@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ event_name }} Results</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .highlight {
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ event_name }} Results</h1>
+    <table>
+        <tr>
+            <th>Line</th>
+            <th>Team</th>
+            <th>Gesamtzeit</th>
+            {% for i in range(max_num_races) %}
+            <th>Zeit {{ i + 1 }}</th>
+            {% endfor %}
+        </tr>
+        {% for team_data in sorted_times %}
+            {% set teamname = team_data[0] %}
+            {% set accumulated_hundredths = team_data[1] %}
+            {% set cumulative_hundredths = accumulated_hundredths | sum %}
+            {% set cumulative_minutes = cumulative_hundredths // (60 * 100) %}
+            {% set cumulative_seconds = (cumulative_hundredths // 100) % 60 %}
+            {% set cumulative_hundredths_remainder = cumulative_hundredths % 100 %}
+            {% set formatted_time = "%d:%02d,%02d" | format(cumulative_minutes, cumulative_seconds, cumulative_hundredths_remainder) %}
+            {% set highlight = "highlight" if "aufschneider" in teamname.lower() else "" %}
+            <tr class="{{ highlight }}">
+                <td>{{ loop.index }}</td>
+                <td>{{ teamname }}</td>
+                <td>{{ formatted_time }}</td>
+                {% for zeit in accumulated_hundredths %}
+                    {% set accumulated_minutes = zeit // (60 * 100) %}
+                    {% set accumulated_seconds = (zeit // 100) % 60 %}
+                    {% set accumulated_hundredths_remainder = zeit % 100 %}
+                    {% set formatted_zeit = "%d:%02d,%02d" | format(accumulated_minutes, accumulated_seconds, accumulated_hundredths_remainder) %}
+                    <td>{{ formatted_zeit }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
